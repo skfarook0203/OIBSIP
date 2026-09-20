@@ -1,0 +1,6 @@
+{
+  "name": "CipherCraft Pro - Random Password Generator",
+  "description": "OASIS INFOBYTE Internship Task 3 - Advanced Python Tkinter Random Password Generator with secrets CSPRNG, character controls, strength indicator, session history, and pyperclip clipboard integration.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}

@@ -1,0 +1,12 @@
+{
+  "name": "oasis-infobyte-task2-bmi-calculator",
+  "version": "1.0.0",
+  "private": true,
+  "description": "OASIS INFOBYTE Python Programming Internship — Task 2: Advanced BMI Calculator (Python Desktop Application)",
+  "scripts": {
+    "dev": "python3 server.py",
+    "start": "python3 server.py",
+    "build": "python3 -m unittest test_bmi.py",
+    "test": "python3 -m unittest test_bmi.py"
+  }
+}

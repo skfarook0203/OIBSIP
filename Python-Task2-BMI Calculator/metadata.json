@@ -1,0 +1,6 @@
+{
+  "name": "OASIS INFOBYTE — Task 2: Advanced BMI Calculator",
+  "description": "Python Desktop GUI application for OASIS INFOBYTE Internship Task 2, featuring Tkinter, SQLite3 persistence, and Matplotlib trend analysis.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}

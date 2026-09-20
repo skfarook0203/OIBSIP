@@ -1,0 +1,519 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>OASIS INFOBYTE — Task 2: Advanced BMI Calculator</title>
+  <meta name="description" content="Python Desktop GUI application for OASIS INFOBYTE Internship Task 2, featuring Tkinter, SQLite3 persistence, and Matplotlib trend analysis.">
+  <meta property="og:title" content="OASIS INFOBYTE — Task 2: Advanced BMI Calculator">
+  <meta property="og:description" content="Python Desktop GUI application for OASIS INFOBYTE Internship Task 2, featuring Tkinter, SQLite3 persistence, and Matplotlib trend analysis.">
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif; }
+    body { background-color: #F4F6F9; color: #1A1C1E; min-height: 100vh; display: flex; flex-direction: column; }
+    
+    header { background: #0B1C30; color: #FFFFFF; padding: 14px 24px; display: flex; justify-content: space-between; align-items: center; box-shadow: 0 2px 8px rgba(0,0,0,0.15); }
+    .header-title h1 { font-size: 1.25rem; font-weight: 700; color: #FFFFFF; }
+    .header-title p { font-size: 0.82rem; color: #86F2E4; margin-top: 2px; }
+    .badge { background: #006A61; color: #FFFFFF; font-size: 0.78rem; font-weight: 700; padding: 5px 12px; border-radius: 4px; }
+
+    .main-container { flex: 1; max-width: 1400px; width: 100%; margin: 0 auto; padding: 20px; display: grid; grid-template-columns: 380px 1fr; gap: 20px; }
+    @media (max-width: 960px) { .main-container { grid-template-columns: 1fr; } }
+
+    .card { background: #FFFFFF; border: 1px solid #DCE2EA; border-radius: 8px; padding: 20px; box-shadow: 0 1px 3px rgba(0,0,0,0.05); }
+    
+    h2 { font-size: 1.05rem; font-weight: 700; color: #0B1C30; margin-bottom: 14px; border-bottom: 2px solid #E7ECF3; padding-bottom: 6px; }
+    
+    .form-group { margin-bottom: 14px; }
+    label { display: block; font-size: 0.85rem; font-weight: 600; color: #45464D; margin-bottom: 4px; }
+    input, select { width: 100%; padding: 8px 10px; font-size: 0.95rem; border: 1px solid #C4C7D0; border-radius: 4px; outline: none; background: #FFFFFF; }
+    input:focus, select:focus { border-color: #006A61; box-shadow: 0 0 0 2px rgba(0,106,97,0.15); }
+    .hint { font-size: 0.75rem; color: #76777D; margin-top: 3px; font-style: italic; }
+
+    .notification-banner { display: none; padding: 10px 14px; border-radius: 4px; margin-bottom: 14px; font-size: 0.85rem; font-weight: 500; }
+    .notification-banner.error { background: #FFDAD6; color: #BA1A1A; border: 1px solid #FFB4AB; display: block; }
+    .notification-banner.success { background: #D2E7D6; color: #0D522C; border: 1px solid #A3D4AE; display: block; }
+
+    .btn-group { display: flex; gap: 8px; margin-top: 16px; margin-bottom: 18px; }
+    button { cursor: pointer; font-size: 0.9rem; font-weight: 600; padding: 8px 16px; border-radius: 4px; border: none; transition: 0.15s; }
+    .btn-primary { background: #006A61; color: #FFFFFF; flex: 2; }
+    .btn-primary:hover { background: #00534C; }
+    .btn-secondary { background: #E0E2EC; color: #1A1C1E; flex: 1; }
+    .btn-secondary:hover { background: #D0D3DE; }
+    .btn-danger { background: #FFDAD6; color: #BA1A1A; font-size: 0.8rem; padding: 6px 12px; }
+    .btn-danger:hover { background: #FFB4AB; }
+    .btn-outline { background: transparent; border: 1px solid #C4C7D0; color: #1A1C1E; font-size: 0.8rem; padding: 6px 12px; }
+    .btn-outline:hover { background: #E7ECF3; }
+
+    .result-box { background: #F8F9FB; border: 1px solid #DCE2EA; border-radius: 6px; padding: 14px; text-align: center; margin-bottom: 16px; }
+    .bmi-value { font-size: 2rem; font-weight: 800; color: #0B1C30; }
+    .category-badge { display: inline-block; padding: 4px 14px; font-size: 0.85rem; font-weight: 700; border-radius: 20px; margin: 6px 0; }
+    .range-info { font-size: 0.8rem; color: #45464D; margin-top: 4px; }
+
+    .ref-table { font-size: 0.78rem; color: #45464D; background: #FFFFFF; border: 1px dashed #DCE2EA; padding: 10px; border-radius: 4px; margin-bottom: 14px; line-height: 1.5; }
+
+    .disclaimer { font-size: 0.72rem; color: #76777D; line-height: 1.4; font-style: italic; border-top: 1px solid #E7ECF3; padding-top: 10px; }
+
+    .tabs { display: flex; border-bottom: 1px solid #DCE2EA; margin-bottom: 16px; }
+    .tab-btn { padding: 10px 18px; border: none; background: transparent; font-weight: 600; font-size: 0.9rem; color: #76777D; cursor: pointer; border-bottom: 2px solid transparent; }
+    .tab-btn.active { color: #006A61; border-bottom-color: #006A61; background: #FFFFFF; }
+
+    .tab-content { display: none; }
+    .tab-content.active { display: block; }
+
+    .filter-bar { display: flex; justify-content: space-between; align-items: center; margin-bottom: 14px; flex-wrap: wrap; gap: 8px; }
+    .filter-left { display: flex; align-items: center; gap: 8px; }
+    .filter-left select { width: 180px; padding: 5px 8px; font-size: 0.85rem; }
+
+    table { width: 100%; border-collapse: collapse; font-size: 0.85rem; }
+    th { background: #E7ECF3; color: #0B1C30; text-align: left; padding: 8px 10px; font-weight: 700; border-bottom: 1px solid #DCE2EA; }
+    td { padding: 8px 10px; border-bottom: 1px solid #F0F2F5; }
+    tr:hover td { background: #F8F9FB; }
+
+    .chart-container { text-align: center; padding: 10px 0; }
+    .chart-img { max-width: 100%; height: auto; border: 1px solid #DCE2EA; border-radius: 6px; box-shadow: 0 1px 4px rgba(0,0,0,0.05); }
+
+    .desktop-banner { margin-top: 16px; padding: 10px 14px; background: #EFF4FF; border-left: 4px solid #006A61; border-radius: 4px; font-size: 0.82rem; color: #0B1C30; }
+    .desktop-banner code { background: #E0E2EC; padding: 2px 6px; border-radius: 3px; font-family: monospace; }
+
+    /* Custom Non-blocking Modal Dialog */
+    .modal-overlay { display: none; position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.5); z-index: 1000; align-items: center; justify-content: center; }
+    .modal-overlay.active { display: flex; }
+    .modal-card { background: #FFFFFF; border-radius: 8px; padding: 24px; max-width: 440px; width: 90%; box-shadow: 0 8px 24px rgba(0,0,0,0.2); }
+    .modal-card h3 { font-size: 1.1rem; color: #0B1C30; margin-bottom: 10px; }
+    .modal-card p { font-size: 0.88rem; color: #45464D; line-height: 1.5; margin-bottom: 20px; }
+    .modal-actions { display: flex; justify-content: flex-end; gap: 10px; }
+
+    footer { background: #E0E2EC; color: #45464D; padding: 8px 24px; font-size: 0.8rem; text-align: left; display: flex; justify-content: space-between; }
+  </style>
+</head>
+<body>
+
+  <header id="appHeader">
+    <div class="header-title" id="headerTitle">
+      <h1>OASIS INFOBYTE — Task 2: Advanced BMI Calculator</h1>
+      <p>Python Desktop Application • Multi-User SQLite Storage • Matplotlib Trend Analysis</p>
+    </div>
+    <div class="badge" id="appBadge">Python 3 & SQLite3</div>
+  </header>
+
+  <div class="main-container" id="mainContainer">
+    <!-- Left Column: Input Form & Results -->
+    <div class="card" id="inputCard">
+      <h2>User & Measurements</h2>
+
+      <!-- Feedback Banner (avoids iframe window.alert issues) -->
+      <div id="noticeBanner" class="notification-banner"></div>
+
+      <div class="form-group">
+        <label for="userName">User Name</label>
+        <div style="display: flex; gap: 6px;">
+          <input type="text" id="userName" placeholder="Enter name or select below" list="userList">
+          <datalist id="userList"></datalist>
+        </div>
+        <div class="hint">Type a new name or pick an existing user profile</div>
+      </div>
+
+      <div class="form-group">
+        <label for="weight">Weight in Kilograms (kg)</label>
+        <input type="number" id="weight" step="0.1" placeholder="e.g. 70.5">
+      </div>
+
+      <div class="form-group">
+        <label for="height">Height in Meters (m)</label>
+        <input type="number" id="height" step="0.01" placeholder="e.g. 1.75">
+        <div class="hint">Height in meters (175 cm = 1.75 m)</div>
+      </div>
+
+      <div class="btn-group">
+        <button class="btn-primary" id="calcBtn" onclick="calculateBMI()">Calculate BMI</button>
+        <button class="btn-secondary" id="clearBtn" onclick="clearForm()">Clear</button>
+      </div>
+
+      <div class="result-box" id="resultBox">
+        <div class="bmi-value" id="bmiDisplay">BMI: --.--</div>
+        <div class="category-badge" id="categoryBadge" style="background: #E0E2EC; color: #1A1C1E;">Category: Awaiting calculation</div>
+        <div class="range-info" id="rangeInfo">Healthy weight range for height: --</div>
+      </div>
+
+      <div class="ref-table" id="refTable">
+        <strong>WHO BMI Reference Standards:</strong><br>
+        • Underweight: &lt; 18.5 (Blue)<br>
+        • Normal weight: 18.5 – 24.9 (Green)<br>
+        • Overweight: 25.0 – 29.9 (Orange)<br>
+        • Obesity: ≥ 30.0 (Red)
+      </div>
+
+      <div class="disclaimer" id="medicalDisclaimer">
+        <strong>Medical Disclaimer:</strong><br>
+        BMI is a general screening indicator and does not replace medical diagnosis, clinical evaluation, or professional healthcare advice.
+      </div>
+
+      <div class="desktop-banner" id="desktopBanner">
+        💻 <strong>Run Native Tkinter Desktop GUI:</strong><br>
+        <code>python bmi_calculator.py</code>
+      </div>
+    </div>
+
+    <!-- Right Column: History & Trends -->
+    <div class="card" id="historyCard">
+      <div class="tabs" id="tabControls">
+        <button class="tab-btn active" id="tabBtnHistory" onclick="switchTab('history')">BMI Measurement History</button>
+        <button class="tab-btn" id="tabBtnTrend" onclick="switchTab('trend')">Longitudinal Trend Chart (Matplotlib)</button>
+      </div>
+
+      <!-- Tab 1: History Log Table -->
+      <div id="historyTab" class="tab-content active">
+        <div class="filter-bar" id="filterBar">
+          <div class="filter-left">
+            <label for="userFilter" style="margin:0;">Filter by User:</label>
+            <select id="userFilter" onchange="loadRecords()">
+              <option value="All Users">All Users</option>
+            </select>
+            <button class="btn-outline" id="refreshBtn" onclick="loadData()">Refresh</button>
+            <button class="btn-outline" id="exportBtn" onclick="exportCSV()">Export CSV</button>
+          </div>
+          <div>
+            <button class="btn-danger" id="clearUserBtn" onclick="requestClearUserHistory()">Clear User History</button>
+          </div>
+        </div>
+
+        <div style="overflow-x: auto; max-height: 500px;" id="tableWrapper">
+          <table id="recordsTable">
+            <thead>
+              <tr>
+                <th style="width: 50px; text-align: center;"># ID</th>
+                <th>Date / Time</th>
+                <th>User Name</th>
+                <th style="text-align: right;">Weight (kg)</th>
+                <th style="text-align: right;">Height (m)</th>
+                <th style="text-align: right;">BMI</th>
+                <th>Category</th>
+                <th style="width: 70px; text-align: center;">Action</th>
+              </tr>
+            </thead>
+            <tbody id="recordsBody">
+              <tr><td colspan="8" style="text-align: center; color: #76777D; padding: 20px;">Loading records...</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- Tab 2: Matplotlib Trend Chart -->
+      <div id="trendTab" class="tab-content">
+        <div class="filter-bar" id="chartFilterBar">
+          <div>
+            <strong>Viewing Trend for:</strong> <span id="trendUserLabel" style="color: #006A61; font-weight: 700;">John</span>
+          </div>
+          <div>
+            <button class="btn-outline" id="refreshChartBtn" onclick="refreshChart()">Update Chart</button>
+          </div>
+        </div>
+
+        <div class="chart-container" id="chartWrapper">
+          <img id="chartImg" class="chart-img" src="/api/chart.png" alt="BMI Longitudinal Trend Chart">
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <footer id="appFooter">
+    <span id="statusBar">Connected to local SQLite database (bmi_calculator.db) • Ready</span>
+    <span>OASIS INFOBYTE Internship Task 2</span>
+  </footer>
+
+  <!-- Modal Dialog for Confirmations (Avoids iframe window.confirm blocks) -->
+  <div class="modal-overlay" id="confirmModal">
+    <div class="modal-card">
+      <h3 id="modalTitle">Confirm Action</h3>
+      <p id="modalMessage">Are you sure?</p>
+      <div class="modal-actions">
+        <button class="btn-secondary" onclick="closeModal()">Cancel</button>
+        <button class="btn-danger" id="modalConfirmBtn" onclick="onModalConfirm()">Confirm</button>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    let currentUsers = [];
+    let modalCallback = null;
+
+    function showNotice(text, type = "error") {
+      const banner = document.getElementById("noticeBanner");
+      banner.textContent = text;
+      banner.className = "notification-banner " + type;
+      banner.style.display = "block";
+      if (type === "success") {
+        setTimeout(() => { banner.style.display = "none"; }, 5000);
+      }
+    }
+
+    function hideNotice() {
+      const banner = document.getElementById("noticeBanner");
+      banner.style.display = "none";
+      banner.textContent = "";
+    }
+
+    function openModal(title, message, onConfirm) {
+      document.getElementById("modalTitle").textContent = title;
+      document.getElementById("modalMessage").textContent = message;
+      modalCallback = onConfirm;
+      document.getElementById("confirmModal").classList.add("active");
+    }
+
+    function closeModal() {
+      document.getElementById("confirmModal").classList.remove("active");
+      modalCallback = null;
+    }
+
+    function onModalConfirm() {
+      if (typeof modalCallback === "function") {
+        modalCallback();
+      }
+      closeModal();
+    }
+
+    async function loadData() {
+      try {
+        const res = await fetch("/api/data");
+        const data = await res.json();
+        currentUsers = data.users || [];
+        
+        const userList = document.getElementById("userList");
+        const userFilter = document.getElementById("userFilter");
+        const prevFilter = userFilter.value;
+
+        userList.innerHTML = "";
+        userFilter.innerHTML = '<option value="All Users">All Users</option>';
+
+        currentUsers.forEach(u => {
+          const opt1 = document.createElement("option");
+          opt1.value = u;
+          userList.appendChild(opt1);
+
+          const opt2 = document.createElement("option");
+          opt2.value = u;
+          opt2.textContent = u;
+          userFilter.appendChild(opt2);
+        });
+
+        if (currentUsers.includes(prevFilter)) {
+          userFilter.value = prevFilter;
+        }
+
+        renderTable(data.records || []);
+      } catch (err) {
+        showNotice("Failed to load records from SQLite: " + err.message, "error");
+      }
+    }
+
+    async function loadRecords() {
+      const filter = document.getElementById("userFilter").value;
+      try {
+        const res = await fetch("/api/data?user=" + encodeURIComponent(filter));
+        const data = await res.json();
+        renderTable(data.records || []);
+        updateTrendUser(filter);
+      } catch (err) {
+        showNotice("Failed to filter records: " + err.message, "error");
+      }
+    }
+
+    function renderTable(records) {
+      const tbody = document.getElementById("recordsBody");
+      if (!records || records.length === 0) {
+        tbody.innerHTML = '<tr><td colspan="8" style="text-align: center; color: #76777D; padding: 20px;">No BMI records found.</td></tr>';
+        return;
+      }
+
+      tbody.innerHTML = records.map(r => {
+        const color = getCategoryColor(r.category);
+        return `
+          <tr>
+            <td style="text-align: center; font-weight: bold; color: #76777D;">#${r.id}</td>
+            <td>${r.date_time}</td>
+            <td><strong>${escapeHtml(r.user_name)}</strong></td>
+            <td style="text-align: right;">${Number(r.weight).toFixed(1)}</td>
+            <td style="text-align: right;">${Number(r.height).toFixed(2)}</td>
+            <td style="text-align: right; font-weight: bold;">${Number(r.bmi).toFixed(2)}</td>
+            <td><span style="display:inline-block; padding: 2px 8px; border-radius: 12px; font-size: 0.78rem; font-weight: 700; color: #FFFFFF; background: ${color};">${r.category}</span></td>
+            <td style="text-align: center;">
+              <button class="btn-danger" style="padding: 2px 6px; font-size: 0.75rem;" onclick="requestDeleteRecord(${r.id}, '${escapeHtml(r.user_name)}')">Delete</button>
+            </td>
+          </tr>
+        `;
+      }).join("");
+    }
+
+    function getCategoryColor(cat) {
+      if (cat === "Underweight") return "#1976D2";
+      if (cat === "Normal weight") return "#2E7D32";
+      if (cat === "Overweight") return "#ED6C02";
+      if (cat === "Obesity") return "#D32F2F";
+      return "#45464D";
+    }
+
+    function escapeHtml(str) {
+      return String(str)
+        .replace(/&/g, "&amp;")
+        .replace(/</g, "&lt;")
+        .replace(/>/g, "&gt;")
+        .replace(/"/g, "&quot;")
+        .replace(/'/g, "&#39;");
+    }
+
+    async function calculateBMI() {
+      hideNotice();
+      const name = document.getElementById("userName").value.trim();
+      const weight = document.getElementById("weight").value.trim();
+      const height = document.getElementById("height").value.trim();
+
+      if (!name) { showNotice("Please enter or select a user name.", "error"); return; }
+      if (!weight) { showNotice("Please enter weight in kilograms (kg).", "error"); return; }
+      if (!height) { showNotice("Please enter height in meters (m).", "error"); return; }
+
+      try {
+        const res = await fetch("/api/calculate", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ name, weight, height })
+        });
+        const result = await res.json();
+
+        if (!result.success) {
+          showNotice("Input Validation Error: " + result.error, "error");
+          return;
+        }
+
+        // Update UI Result Display
+        document.getElementById("bmiDisplay").textContent = "BMI: " + result.bmi.toFixed(2);
+        const badge = document.getElementById("categoryBadge");
+        badge.textContent = "Category: " + result.category;
+        badge.style.background = result.color;
+        badge.style.color = "#FFFFFF";
+
+        document.getElementById("rangeInfo").textContent = "Healthy weight range for " + result.height.toFixed(2) + " m: " + result.min_weight + " kg – " + result.max_weight + " kg";
+        document.getElementById("statusBar").textContent = "Record #" + result.record_id + " saved for " + result.name + " in SQLite.";
+        showNotice("Calculation complete: BMI " + result.bmi.toFixed(2) + " (" + result.category + ") saved to database.", "success");
+
+        await loadData();
+        updateTrendUser(result.name);
+      } catch (err) {
+        showNotice("Failed to calculate BMI: " + err.message, "error");
+      }
+    }
+
+    function clearForm() {
+      hideNotice();
+      document.getElementById("userName").value = "";
+      document.getElementById("weight").value = "";
+      document.getElementById("height").value = "";
+      document.getElementById("bmiDisplay").textContent = "BMI: --.--";
+      const badge = document.getElementById("categoryBadge");
+      badge.textContent = "Category: Awaiting calculation";
+      badge.style.background = "#E0E2EC";
+      badge.style.color = "#1A1C1E";
+      document.getElementById("rangeInfo").textContent = "Healthy weight range for height: --";
+      document.getElementById("statusBar").textContent = "Input fields cleared.";
+    }
+
+    function requestDeleteRecord(id, user) {
+      openModal(
+        "Confirm Deletion",
+        "Are you sure you want to permanently delete record #" + id + " for '" + user + "'?",
+        async () => {
+          try {
+            const res = await fetch("/api/delete", {
+              method: "POST",
+              headers: { "Content-Type": "application/json" },
+              body: JSON.stringify({ id })
+            });
+            const result = await res.json();
+            if (result.success) {
+              showNotice("Record #" + id + " deleted successfully.", "success");
+              loadRecords();
+              refreshChart();
+            } else {
+              showNotice("Error: " + result.error, "error");
+            }
+          } catch (err) {
+            showNotice("Failed to delete record: " + err.message, "error");
+          }
+        }
+      );
+    }
+
+    function requestClearUserHistory() {
+      const filter = document.getElementById("userFilter").value;
+      if (filter === "All Users" || !filter) {
+        showNotice("Please select a specific user from the 'Filter by User' dropdown to clear their history.", "error");
+        return;
+      }
+
+      openModal(
+        "Clear User History",
+        "Permanently delete all BMI records for '" + filter + "'? This action cannot be undone.",
+        async () => {
+          try {
+            const res = await fetch("/api/clear_user", {
+              method: "POST",
+              headers: { "Content-Type": "application/json" },
+              body: JSON.stringify({ user: filter })
+            });
+            const result = await res.json();
+            if (result.success) {
+              document.getElementById("userFilter").value = "All Users";
+              showNotice("All records for '" + filter + "' have been deleted.", "success");
+              await loadData();
+              refreshChart();
+            } else {
+              showNotice("Error: " + result.error, "error");
+            }
+          } catch (err) {
+            showNotice("Failed to clear user history: " + err.message, "error");
+          }
+        }
+      );
+    }
+
+    function exportCSV() {
+      const filter = document.getElementById("userFilter").value;
+      window.location.href = "/api/export_csv?user=" + encodeURIComponent(filter);
+    }
+
+    function updateTrendUser(userName) {
+      if (!userName || userName === "All Users") {
+        const firstUser = currentUsers[0] || "John";
+        document.getElementById("trendUserLabel").textContent = firstUser;
+        document.getElementById("chartImg").src = "/api/chart.png?user=" + encodeURIComponent(firstUser) + "&t=" + Date.now();
+      } else {
+        document.getElementById("trendUserLabel").textContent = userName;
+        document.getElementById("chartImg").src = "/api/chart.png?user=" + encodeURIComponent(userName) + "&t=" + Date.now();
+      }
+    }
+
+    function refreshChart() {
+      const user = document.getElementById("trendUserLabel").textContent;
+      document.getElementById("chartImg").src = "/api/chart.png?user=" + encodeURIComponent(user) + "&t=" + Date.now();
+    }
+
+    function switchTab(tabName) {
+      document.querySelectorAll(".tab-btn").forEach(btn => btn.classList.remove("active"));
+      document.querySelectorAll(".tab-content").forEach(c => c.classList.remove("active"));
+
+      if (tabName === "history") {
+        document.getElementById("tabBtnHistory").classList.add("active");
+        document.getElementById("historyTab").classList.add("active");
+      } else {
+        document.getElementById("tabBtnTrend").classList.add("active");
+        document.getElementById("trendTab").classList.add("active");
+        refreshChart();
+      }
+    }
+
+    // Initialize on page load
+    window.addEventListener("DOMContentLoaded", () => {
+      loadData();
+    });
+  </script>
+</body>
+</html>

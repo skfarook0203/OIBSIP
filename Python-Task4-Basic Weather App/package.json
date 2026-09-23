@@ -1,0 +1,12 @@
+{
+  "name": "oasis-weather-app-python",
+  "version": "2.0.0",
+  "private": true,
+  "description": "OASIS Infobyte Task 4 - Weather App (Advanced Tier Python Desktop GUI)",
+  "scripts": {
+    "dev": "python3 web_preview.py",
+    "build": "python3 -m py_compile weather_app.py weather_cli.py weather_service.py forecast_service.py location_service.py config.py icon_manager.py web_preview.py tests/test_weather.py",
+    "lint": "python3 -m py_compile weather_app.py weather_cli.py weather_service.py forecast_service.py location_service.py config.py icon_manager.py web_preview.py tests/test_weather.py",
+    "test": "python3 -m unittest discover tests"
+  }
+}

@@ -1,0 +1,6 @@
+{
+  "name": "Weather Application",
+  "description": "A comprehensive weather application featuring a Beginner Tier CLI tool and an Advanced Tier desktop GUI with real-time OpenWeatherMap data, 6-hour and 5-day forecasts, unit switching, and IP geolocation.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
